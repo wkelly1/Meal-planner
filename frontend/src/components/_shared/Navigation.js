@@ -11,6 +11,7 @@ import EventIcon from '@material-ui/icons/Event';
 import ListIcon from '@material-ui/icons/List';
 import ShoppingBasketOutlinedIcon from '@material-ui/icons/ShoppingBasketOutlined';
 import FastfoodOutlinedIcon from '@material-ui/icons/FastfoodOutlined';
+
 function Navigation(props) {
   const pathname = window.location.pathname;
   const [selected, setSelected] = useState(pathname);
@@ -146,9 +147,9 @@ function Navigation(props) {
               </div>
 
               <div className="padding-top">
-                <a href="" className="link c-white dropdown-nav-item" onClick={logout}>
+                <span className="link c-white dropdown-nav-item cursor-pointer" onClick={logout}>
                   Logout
-                  </a>
+                  </span>
               </div>
             </div>
           ) : null}

@@ -32,7 +32,7 @@ class UserService {
                 return response.json();
             })
     }
-
+    /*eslint no-dupe-class-members: 0*/
     async getMeals(offset, limit, query) {
         const headers = await authHeader();
         return fetch(`/api/meals?limit=${limit}&offset=${offset}&query=${query}`, {

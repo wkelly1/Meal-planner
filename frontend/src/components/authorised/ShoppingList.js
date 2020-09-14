@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import useNotification from "../../_helpers/hooks/useNotification";
-import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/services/auth.service";
 import Navigation from "../_shared/Navigation";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -11,10 +10,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { IconButton, TablePagination, TableSortLabel, Toolbar, Tooltip, Typography } from "@material-ui/core";
+import { IconButton, TablePagination, Toolbar, Tooltip, Typography } from "@material-ui/core";
 import PrintIcon from '@material-ui/icons/Print';
-import ReactToPrint, { useReactToPrint } from 'react-to-print';
-import authHeader from "../../_helpers/services/auth-header";
+import ReactToPrint from 'react-to-print';
 import userService from "../../_helpers/services/user.service";
 
 function descendingComparator(a, b, orderBy) {
@@ -47,11 +45,12 @@ function ShoppingList(props) {
     const [shoppingList, setShoppingList] = useState([]);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('name');
+    const [order] = React.useState('asc');
+    const [orderBy] = React.useState('name');
 
     const { addNotification } = useNotification();
 
+    /*eslint no-extend-native: ["error", { "exceptions": ["Date"] }]*/
     Date.prototype.getWeek = function () {
         var date = new Date(this.getTime());
         date.setHours(0, 0, 0, 0);
@@ -75,6 +74,7 @@ function ShoppingList(props) {
     useEffect(() => {
         let d = new Date();
         getShoppingList(d.getFullYear(), d.getWeek());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     async function getShoppingList(year, week) {
@@ -98,18 +98,9 @@ function ShoppingList(props) {
         setPage(0);
     };
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, shoppingList.length - page * rowsPerPage);
-    const handleRequestSort = (event, property) => {
-        const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
-    };
-
-    const createSortHandler = (property) => (event) => {
-        handleRequestSort(event, property);
-    };
 
     const printComponent = useRef();
-    
+
 
     return (
         <div>
@@ -119,7 +110,7 @@ function ShoppingList(props) {
 
             <Navigation current_user={props.current_user} />
             <div style={{ display: "none" }}>
-                <ComponentToPrint ref={printComponent} rows={shoppingList}/>
+                <ComponentToPrint ref={printComponent} rows={shoppingList} />
             </div>
             <div className="flex-container flex-justify-center margin-top">
 
@@ -205,10 +196,10 @@ class ComponentToPrint extends React.Component {
                     style={{ height: "60px" }}
                 >
                     <div className="flex-container flex-justify-spacebetween flex-align-center fill-height fill-width">
-                        
-                            <h2 className="c-white margin-right margin-left">Meals</h2>
-                            <h2 className="c-white margin-right margin-left">Shopping list</h2>
-                    
+
+                        <h2 className="c-white margin-right margin-left">Meals</h2>
+                        <h2 className="c-white margin-right margin-left">Shopping list</h2>
+
                     </div>
                 </div>
 

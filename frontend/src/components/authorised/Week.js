@@ -1,14 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import Navigation from "../_shared/Navigation";
 import {
   IconButton,
   Tooltip,
   InputLabel,
-  FormControl,
-  makeStyles,
   Chip,
-  Avatar, Badge, Input, Slide, useTheme, useMediaQuery
+  Avatar, useTheme, useMediaQuery
 } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -16,44 +14,28 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import Paper from '@material-ui/core/Paper';
 import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
 import Draggable from 'react-draggable';
-import {
-  catchError401,
-  getJwt,
-  updateToken,
-  isAuthenticated,
-} from "../../_helpers/services/auth.service";
 import useNotification from "../../_helpers/hooks/useNotification";
-import { DebounceInput } from "react-debounce-input";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import useDebounce from "../../_helpers/hooks/useDebounce";
 import {
   MuiPickersUtilsProvider,
-  KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { AvatarGroup } from "@material-ui/lab";
-import { Rnd } from "react-rnd";
-import authHeader from "../../_helpers/services/auth-header";
 import userService from "../../_helpers/services/user.service";
 
 const Week = (props) => {
   const [open, setOpen] = React.useState(false);
   const { addNotification } = useNotification();
-  const [mealType, setMealType] = React.useState("breakfast");
 
   // Meal search
   const [mealSearchQuery, setMealSearchQuery] = React.useState("");
@@ -64,11 +46,7 @@ const Week = (props) => {
   const [gotAllMeals, setGotAllMeals] = React.useState(true);
   const [currentWeekSubtraction, setCurrentWeekSubtraction] = React.useState(0);
   const [people, setPeople] = React.useState([...props.current_user.people.map((value) => ({ ...value, selected: false, current_user: false })), { first_name: props.current_user.firstName, last_name: props.current_user.lastName, current_user: true, selected: true }])
-  const [current_user, setCurrent_user] = React.useState(props.current_user);
   let limit = 10;
-  const [position, setPosition] = React.useState({
-    x: 0, y: 0
-  })
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('sm'));
@@ -102,9 +80,6 @@ const Week = (props) => {
     { day: "SUN" },
   ]);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setTempCalendarDate("");
@@ -119,7 +94,9 @@ const Week = (props) => {
     return new Date(date.setDate(diff));
   }
 
+  /*eslint no-extend-native: ["error", { "exceptions": ["Date"] }]*/
   Date.prototype.getWeek = function () {
+
     var date = new Date(this.getTime());
     date.setHours(0, 0, 0, 0);
     // Thursday in current week decides the year.
@@ -174,6 +151,7 @@ const Week = (props) => {
     let d = new Date();
     d.setDate(d.getDate() - (currentWeekSubtraction * 7));
     setUpWeek(d);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWeekSubtraction]);
 
   function setUpWeek(d) {
@@ -189,23 +167,16 @@ const Week = (props) => {
     setDays(temp);
 
     getCalendar(d.getWeek(), d.getFullYear());
+
   }
 
   const getCalendar = async (week, year) => {
-    const headers = await authHeader();
-
-    fetch(`/api/calendar?week=${week}&year=${year}`, {
-      headers: headers,
-    })
-      .then((response) => {
-        catchError401(response.status);
-
-        return response.json();
-      })
+    userService.getCalendar(week, year)
       .then((value) => {
         setCalendar(value.calendar);
       })
       .catch((err) => { });
+
   };
 
   function addMeal(day, event) {
@@ -222,7 +193,7 @@ const Week = (props) => {
     let tempX = coordX - 363;
     let tempY = coordY + 150;
     let x = coordX - (wrapperWidth / 2) - (363 / 2);
-    let y = coordY - (wrapperHeight / 2) + 150;
+    //let y = coordY - (wrapperHeight / 2) + 150;
     console.log(tempX, wrapperWidth);
     console.log(tempY, wrapperHeight)
     if (tempX < 0 || tempX > wrapperWidth) {
@@ -234,9 +205,9 @@ const Week = (props) => {
 
     }
 
-    if (tempY < 0 || tempY > wrapperHeight) {
-      y = 0;
-    }
+    // if (tempY < 0 || tempY > wrapperHeight) {
+    //   y = 0;
+    // }
     setX(x);
     setOpen(true);
 
@@ -251,37 +222,37 @@ const Week = (props) => {
   async function getMeals(query, offset) {
 
     userService.getMeals(offset, limit, query)
-    .then((value) => {
-      //console.log(value);
-      if (offset === 0) {
-        //console.log("DOING THIS")
-        setSearchedMeals(value.map((val) => {
-          return { ...val, collapsed: true };
-        }));
+      .then((value) => {
+        //console.log(value);
+        if (offset === 0) {
+          //console.log("DOING THIS")
+          setSearchedMeals(value.map((val) => {
+            return { ...val, collapsed: true };
+          }));
 
 
-      } else {
-        setSearchedMeals(searchedMeals =>
-          searchedMeals.concat(
-            value.map((val) => {
-              return { ...val, collapsed: true };
-            })
-          )
-        );
-      }
+        } else {
+          setSearchedMeals(searchedMeals =>
+            searchedMeals.concat(
+              value.map((val) => {
+                return { ...val, collapsed: true };
+              })
+            )
+          );
+        }
 
-      if (value.length < limit) {
-        setGotAllMeals(true);
-      }
+        if (value.length < limit) {
+          setGotAllMeals(true);
+        }
 
-      setMealSearchOffset(mealSearchOffset => mealSearchOffset + limit);
+        setMealSearchOffset(mealSearchOffset => mealSearchOffset + limit);
 
-      console.log(offset);
-    })
-    .catch((err) => {
-      console.error(err);
-      addNotification("Something went wrong", "error");
-    });
+        console.log(offset);
+      })
+      .catch((err) => {
+        console.error(err);
+        addNotification("Something went wrong", "error");
+      });
   }
 
   function selectMeal(meal) {
@@ -312,12 +283,13 @@ const Week = (props) => {
 
       getMeals(debouncedMealSearchQuery, 0).then(() => { });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMealSearchQuery])
 
 
   async function saveCalendar() {
     let for_current_user = people.some((value) => (value.current_user && value.selected));
-    let newPeople = [...people.filter((value) => { if (!value.current_user && value.selected) { return true } }).map((value) => value.people_id)];
+    let newPeople = [...people.filter((value) => { if (!value.current_user && value.selected) { return true } else {return false} }).map((value) => value.people_id)];
 
     userService.setCalendar(selectedMeal.meal_id, tempCalendarMealTime, tempCalendarDate, for_current_user, newPeople)
       .then((value) => {
@@ -348,13 +320,13 @@ const Week = (props) => {
 
   async function getMealDetails(meal_id) {
     userService.getMeal(meal_id)
-    .then((value) => {
-      setFetchedMealDetails(value);
-    })
-    .catch((err) => {
-      console.error(err);
-      addNotification("Something went wrong", "error");
-    });
+      .then((value) => {
+        setFetchedMealDetails(value);
+      })
+      .catch((err) => {
+        console.error(err);
+        addNotification("Something went wrong", "error");
+      });
   }
 
   function filterPeople(people) {
@@ -384,11 +356,9 @@ const Week = (props) => {
 
 
   function PaperComponent(props) {
-    const [moving, setMoving] = React.useState(false);
-    console.log(props)
 
     return (
-      <Draggable cancel={'[class*="MuiDialogContent-root"]'} handle={props.handle} onStart={() => setMoving(true)} onStop={(e, u) => { props.setx(u.x); props.sety(u.y); setMoving(false) }} position={{ x: props.x, y: props.y }}>
+      <Draggable cancel={'[class*="MuiDialogContent-root"]'} handle={props.handle}  onStop={(e, u) => { props.setx(u.x); props.sety(u.y); }} position={{ x: props.x, y: props.y }}>
 
         <Paper {...props} style={{ margin: 0, maxWidth: 362 }} />
 
@@ -432,7 +402,6 @@ const Week = (props) => {
           sety: setY,
           handle: "#draggable-dialog-title"
         }}
-        position={position}
 
         open={openMealDetails}
         onClose={() => setOpenMealDetails(false)}

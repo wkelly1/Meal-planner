@@ -11,15 +11,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Avatar, Divider, Paper, Snackbar, Tooltip, Typography } from "@material-ui/core";
 import { Alert, Skeleton } from "@material-ui/lab";
-import {
-    catchError401,
-    getJwt,
-    updateToken,
-    isAuthenticated,
-} from "../../_helpers/services/auth.service";
+
 import ButtonLoader from "../_shared/ButtonLoader";
 import { Button } from "@material-ui/core";
-import authHeader from "../../_helpers/services/auth-header";
 import userService from "../../_helpers/services/user.service";
 
 const Dashboard = (props) => {
@@ -27,7 +21,7 @@ const Dashboard = (props) => {
     const [mealsRefined, setMealsRefined] = useState([]);
     const [loadingMeals, setLoadingMeals] = useState(false);
     const [gotAllMeals, setGotAllMeals] = useState(false);
-    const [limit, setLimit] = useState(10);
+    const [limit] = useState(10);
     const [offset, setOffset] = useState(0);
     const [open, setOpen] = React.useState(false);
     const [successOpen, setSuccessOpen] = React.useState(false);
@@ -35,9 +29,6 @@ const Dashboard = (props) => {
     const [mealTempIndex, setMealTempIndex] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
 
     const handleClose = () => {
         setOpen(false);
@@ -45,6 +36,7 @@ const Dashboard = (props) => {
 
     useEffect(() => {
         getMeals(limit, offset);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function getMeals(limit, offset) {

@@ -1,16 +1,9 @@
 import React, { Component } from "react";
-import {
-  catchError401,
-  getJwt,
-  updateToken,
-  isAuthenticated,
-} from "../../_helpers/services/auth.service";
 import Navigation from "../_shared/Navigation";
 import history from "../../_helpers/hooks/history";
 import { DebounceInput } from "react-debounce-input";
 import { Snackbar, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import authHeader from "../../_helpers/services/auth-header";
 import userService from "../../_helpers/services/user.service";
 
 class AddMeal extends Component {
@@ -103,8 +96,6 @@ class AddMeal extends Component {
   async submit(e) {
     e.preventDefault();
 
-    const headers = await authHeader();
-
     let ingredient = this.state.selectedIngredients.map((value) => {
       return {
         ingredient_id: value.ingredient_id,
@@ -171,9 +162,6 @@ class AddMeal extends Component {
   }
 
   render() {
-    const buttonStyle = {
-      borderRadius: 10,
-    };
 
     return (
       <div>

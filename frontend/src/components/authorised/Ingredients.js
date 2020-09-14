@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-
 import { Helmet } from "react-helmet";
-
-import {
-  setJwt,
-  catchError401,
-  getJwt,
-  updateToken,
-  isAuthenticated,
-} from "../../_helpers/services/auth.service";
-
 import Navigation from "../_shared/Navigation";
 import ButtonLoader from "../_shared/ButtonLoader";
 import { Skeleton } from "@material-ui/lab";
@@ -20,7 +10,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import useNotification from "../../_helpers/hooks/useNotification";
-import authHeader from "../../_helpers/services/auth-header";
 import userService from "../../_helpers/services/user.service";
 
 const Ingredients = (props) => {
@@ -29,9 +18,7 @@ const Ingredients = (props) => {
   const [loadingIngredients, setLoadingIngredients] = useState(false);
   const [gotAllIngredients, setGotAllIngredients] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTemp, setDeleteTemp] = useState(null);
@@ -41,7 +28,7 @@ const Ingredients = (props) => {
   useEffect(() => {
 
     getIngredients(limit, offset);
-  }, []);
+  });
 
   async function getIngredients(limit, offset) {
     if (!gotAllIngredients) {
@@ -80,22 +67,6 @@ const Ingredients = (props) => {
       });
   }
 
-  function handleClose(event, reason) {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setSuccess(false);
-  }
-
-  function handleErrorClose(event, reason) {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setError(false);
-  }
-
   function handleDialogClose() {
     setDialogOpen(false);
   }
@@ -107,17 +78,6 @@ const Ingredients = (props) => {
         <title>Your ingredients</title>
       </Helmet>
       <Navigation current_user={props.current_user}></Navigation>
-      {/* <Snackbar open={success} autoHideDuration={6000} onClose={handleClose}>
-        <Alert severity="success" onClose={handleClose}>
-          Ingredient has been deleted!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar open={error} autoHideDuration={6000} onClose={handleErrorClose}>
-        <Alert severity="error" onClose={handleErrorClose}>
-          Something went wrong!
-        </Alert>
-      </Snackbar> */}
 
       <Dialog
         open={dialogOpen}

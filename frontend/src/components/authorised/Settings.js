@@ -1,21 +1,17 @@
 
-import { Avatar, Button, Divider, IconButton, List, ListItem, ListItemText, TextField, Tooltip } from "@material-ui/core";
-import { Settings } from "@material-ui/icons";
-import React, { useEffect, useState, useRef } from "react";
+import { Avatar, Button, IconButton, List, ListItem, ListItemText, TextField, Tooltip } from "@material-ui/core";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import useNotification from "../../_helpers/hooks/useNotification";
-import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/services/auth.service";
+
 import Navigation from "../_shared/Navigation";
 import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 
 import DeleteIcon from '@material-ui/icons/Delete';
-import authHeader from "../../_helpers/services/auth-header";
 import userService from "../../_helpers/services/user.service";
 
 function UserSettings(props) {
@@ -26,11 +22,8 @@ function UserSettings(props) {
     const [firstNameError, setFirstNameError] = useState(false);
     const [lastNameError, setLastNameError] = useState(false);
     const [open, setOpen] = useState(false);
-    const [people, setPeople] = useState(props.current_user.people);
-    const [extraPeople, setExtraPeople] = useState([]);
-    async function addPerson() {
+    const [people] = useState(props.current_user.people);
 
-    }
 
     async function handleSubmit(e) {
         e.preventDefault() // stops default reloading behaviour

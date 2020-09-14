@@ -25,7 +25,7 @@ function Login(props) {
   const [open, setOpen] = useState("");
 
   const { token } = useParams();
-  const [resetToken, setResetToken] = useState(token);
+  const [resetToken] = useState(token);
 
   const [resetOpen, setResetOpen] = useState(!!token);
 
