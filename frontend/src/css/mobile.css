@@ -1,0 +1,110 @@
+/*......Dashboard.......*/
+@media only screen and (max-width: 600px) {
+
+
+.mblHide {
+    display: none;
+}
+
+.mblReveal {
+    display: initial;
+}
+
+/*.......................*/
+
+/*........Other..........*/
+.flex-1, .flex-2, .flex-3, .flex-4, .flex-5, .flex-6, .flex-7, .flex-8, .flex-9, .flex-9-5, .flex-10, .flex-11, .flex-12, .flex-13, .flex-14, .flex-15, .flex-16, .flex-17, .flex-18, .flex-19, .flex-20 {
+    width: 100%;
+}
+
+.flex-sm-1 {
+    width: 5%;
+}
+
+.flex-sm-2 {
+    width: 10%;
+}
+
+.flex-sm-3 {
+    width: 15%;
+}
+
+.flex-sm-4 {
+    width: 20%;
+}
+
+.flex-sm-5 {
+    width: 25%;
+}
+
+.flex-sm-6 {
+    width: 30%;
+}
+
+.flex-sm-7 {
+    width: 35%;
+}
+
+.flex-sm-8 {
+    width: 40%;
+}
+
+.flex-sm-9 {
+    width: 45%;
+}
+
+.flex-sm-10 {
+    width: 50%;
+}
+
+.flex-sm-11 {
+    width: 55%;
+}
+
+.flex-sm-12 {
+    width: 60%;
+}
+
+.flex-sm-13 {
+    width: 65%;
+}
+
+.flex-sm-14 {
+    width: 70%;
+}
+
+.flex-sm-15 {
+    width: 75%;
+}
+
+.flex-sm-16 {
+    width: 80%;
+}
+
+.flex-sm-17 {
+    width: 85%;
+}
+
+.flex-sm-18 {
+    width: 90%;
+}
+
+.flex-sm-19 {
+    width: 95%;
+}
+
+.flex-sm-20 {
+    width: 100%;
+}
+
+.form-container-margin-top {
+    margin-top: 0vh;
+}
+
+.calendar-item{
+    border: none;
+    border-bottom: 1px solid var(--c-light-grey); 
+    min-height: 50px;
+  }
+  
+}
