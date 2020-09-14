@@ -7,6 +7,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Button, TextField } from "@material-ui/core";
 import useNotification from "../../_helpers/hooks/useNotification";
+import authService from "../../_helpers/services/auth.service";
 
 function ResetPassword(props) {
     const [password, setPassword] = useState("");
@@ -35,24 +36,7 @@ function ResetPassword(props) {
         }
 
         if (!(password.length === 0 || confirmPassword.length === 0 || confirmPassword !== password)) {
-            fetch("/api/user/password/reset", {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    password: password,
-                    token: props.token
-                })
-            })
-                .then((response) => {
-
-                    if (!response.ok) {
-                        throw Error(response.statusText);
-                    }
-                    return response.json();
-                })
+            authService.resetPassword(password, props.token)
                 .then((value) => {
                     addNotification("Password has been reset", "success");
                     props.handleClose();

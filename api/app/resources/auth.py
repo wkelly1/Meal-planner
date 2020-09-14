@@ -1,6 +1,7 @@
+import re
 from functools import wraps
 
-from flask import request
+from flask import request, make_response, jsonify
 from flask_jwt_extended import jwt_refresh_token_required, get_jwt_identity, create_access_token, create_refresh_token
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -44,6 +45,22 @@ class SignupApi(Resource):
 
         if user:
             return {'message': "Email already registered!"}, 401
+
+        reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
+
+        # compiling regex
+        pat = re.compile(reg)
+
+        # searching regex
+        mat = re.search(pat, data["password"])
+
+        # validating conditions
+        if not mat:
+            return make_response(jsonify({
+                "msg": {
+                    "password": "Password must be between 6 and 20 characters, have one number, an uppercase and a lowercase letter and at least one symbol"
+                }
+            }), 400)
 
         user = User(email=data["email"], username=data["username"],
                     password=generate_password_hash(data["password"], method='sha256'), first_name=data["first_name"],

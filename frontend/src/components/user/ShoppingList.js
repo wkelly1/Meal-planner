@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import useNotification from "../../_helpers/hooks/useNotification";
-import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/jwt";
+import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/services/auth.service";
 import Navigation from "../Navigation";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,6 +14,8 @@ import Paper from '@material-ui/core/Paper';
 import { IconButton, TablePagination, TableSortLabel, Toolbar, Tooltip, Typography } from "@material-ui/core";
 import PrintIcon from '@material-ui/icons/Print';
 import ReactToPrint, { useReactToPrint } from 'react-to-print';
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -76,26 +78,7 @@ function ShoppingList(props) {
     }, [])
 
     async function getShoppingList(year, week) {
-        if (!isAuthenticated()) {
-            await updateToken();
-        }
-
-        const jwt = getJwt();
-
-        return fetch(`/api/list?year=${year}&week=${week}`, {
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${jwt}`,
-            },
-        })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+        return userService.getShoppingList(year, week)
             .then((value) => {
                 setShoppingList(value.shopping_list);
 

@@ -2,7 +2,7 @@ from flask import jsonify, request, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse, inputs
 
-from app.database.models import Meal, Meal_ingredient, Ingredient, Calendar_people, People, User_people
+from app.database.models import Meal, Meal_ingredient, Ingredient, Calendar_people, People
 from app.database.models import Calendar as Cal
 from app.resources._helpers import get_user
 from extensions import db, database
@@ -42,9 +42,8 @@ class Meals(Resource):
         user = get_user(get_jwt_identity())
         if data["meal_id"]:
             meals = Meal.query.filter_by(public_meal_id=data["meal_id"]).first()
-            print(meals)
         else:
-            print(data["limit"], data["offset"], not (data["limit"] and data["offset"]))
+
             if not (data["limit"] is not None and data["offset"] is not None):
                 return {
                     "message": {
@@ -53,12 +52,14 @@ class Meals(Resource):
                     }
                 }
             if data["query"]:
-                meals = Meal.query.outerjoin(Cal, Cal.meal_meal_id==Meal.meal_id).add_columns(db.func.count(Cal.calendar_id)).filter_by(user_user_id=user.user_id).filter(
-                    Meal.title.like('%' + data["query"] + '%')).group_by(Cal.calendar_id, Meal.meal_id).order_by(db.func.count(Cal.calendar_id)).limit(data["limit"]).offset(
+                meals = Meal.query.outerjoin(Cal, Cal.meal_meal_id==Meal.meal_id).add_columns(db.func.count(Cal.calendar_id)).filter(Meal.user_user_id==user.user_id).filter(
+                    Meal.title.like('%' + data["query"] + '%')).group_by(Cal.calendar_id).order_by(db.func.count(Cal.calendar_id)).limit(data["limit"]).offset(
                     data["offset"]).all()
             else:
-                meals = Meal.query.outerjoin(Cal, Cal.meal_meal_id==Meal.meal_id).add_columns(db.func.count(Cal.calendar_id)).filter_by(user_user_id=user.user_id).group_by(Cal.calendar_id, Meal.meal_id).order_by(db.func.count(Cal.calendar_id)).limit(
+                meals = Meal.query.outerjoin(Cal, Cal.meal_meal_id==Meal.meal_id).add_columns(db.func.count(Cal.calendar_id)).filter(Meal.user_user_id==user.user_id).group_by(Cal.calendar_id).order_by(db.func.count(Cal.calendar_id)).limit(
                     data["limit"]).offset(data["offset"]).all()
+                print(Meal.query.outerjoin(Cal, Cal.meal_meal_id==Meal.meal_id).add_columns(db.func.count(Cal.calendar_id)).filter(Meal.user_user_id==user.user_id).group_by(Cal.calendar_id).order_by(db.func.count(Cal.calendar_id)).limit(
+                    data["limit"]).offset(data["offset"]))
             print(meals)
 
 
@@ -413,7 +414,6 @@ class Calendar(Resource):
                          "FROM calendar "
                          "LEFT JOIN calendar_people c on c.calendar_calendar_id = calendar.calendar_id "
                          "LEFT JOIN people on people.people_id = c.people_people_id "
-                         "LEFT JOIN user_people on people.people_id = user_people.people_people_id "
                          "WHERE calendar.date = %s "
                          "AND calendar.user_user_id = %s "
                          "AND meal_time = %s",

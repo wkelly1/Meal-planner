@@ -4,12 +4,14 @@ import {
   getJwt,
   updateToken,
   isAuthenticated,
-} from "../../_helpers/jwt";
+} from "../../_helpers/services/auth.service";
 import Navigation from "../Navigation";
 import history from "../../history";
 import { DebounceInput } from "react-debounce-input";
 import { Snackbar, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 class AddMeal extends Component {
   constructor(props) {
@@ -46,26 +48,7 @@ class AddMeal extends Component {
 
   async getIngredients() {
     if (!this.state.gotAllIngredients) {
-      if (!isAuthenticated()) {
-        await updateToken();
-      }
-
-      const jwt = getJwt();
-
-      fetch(
-        `/api/ingredients?limit=${this.state.limit}&offset=${this.state.offset}&query=${this.state.ingredientSearch}`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt}`,
-          },
-        }
-      )
-        .then((response) => {
-          catchError401(response.status);
-          return response.json();
-        })
+      userService.getIngredients(this.state.offset, this.state.limit, this.state.ingredientSearch)
         .then((value) => {
           if (this.state.offset === 0) {
             this.setState({
@@ -90,7 +73,10 @@ class AddMeal extends Component {
             offset: this.state.offset + this.state.limit,
             loadingIngredients: false,
           });
-        });
+        })
+        .catch((err) => {
+
+        })
     } else {
       this.setState({
         loadingIngredients: false,
@@ -117,11 +103,8 @@ class AddMeal extends Component {
   async submit(e) {
     e.preventDefault();
 
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
+    const headers = await authHeader();
 
-    const jwt = getJwt();
     let ingredient = this.state.selectedIngredients.map((value) => {
       return {
         ingredient_id: value.ingredient_id,
@@ -130,25 +113,7 @@ class AddMeal extends Component {
       };
     });
 
-    fetch("/api/meals", {
-      method: "post",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({
-        title: this.state.name,
-        ingredients: ingredient,
-      }),
-    })
-      .then((response) => {
-        if (response.status === 400) {
-          throw new Error("Error 400");
-        }
-        catchError401(response.status);
-        return response.json();
-      })
+    userService.setMeal(this.state.name, ingredient)
       .then((value) => {
         history.push("/meals");
       })
@@ -166,11 +131,7 @@ class AddMeal extends Component {
   }
 
   async addNewIngredient() {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
 
-    const jwt = getJwt();
     let ingredient = this.state.selectedIngredients.map((value) => {
       return {
         ingredient_id: value.ingredient_id,
@@ -180,21 +141,7 @@ class AddMeal extends Component {
     });
     console.log(ingredient);
 
-    fetch("/api/ingredients", {
-      method: "post",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({
-        name: this.state.ingredientSearch,
-      }),
-    })
-      .then((response) => {
-        catchError401(response.status);
-        return response.json();
-      })
+    userService.setIngredient(this.state.ingredientSearch)
       .then((value) => {
         this.selectIngredient(value.ingredient);
         this.setState({
@@ -328,22 +275,22 @@ class AddMeal extends Component {
                   ) : null}
 
                   {this.state.ingredientSearch &&
-                  !this.checkExactMatch(this.state.ingredientSearch) ? (
-                    <div
-                      className="b-primary radius-small c-white flex-container flex-align-center wrap-child cursor-pointer margin-right"
-                      style={{ height: "40px" }}
-                      onClick={() => {
-                        this.addNewIngredient();
-                      }}
-                    >
-                      <span class="material-icons padding">
-                        add_circle_outline
+                    !this.checkExactMatch(this.state.ingredientSearch) ? (
+                      <div
+                        className="b-primary radius-small c-white flex-container flex-align-center wrap-child cursor-pointer margin-right"
+                        style={{ height: "40px" }}
+                        onClick={() => {
+                          this.addNewIngredient();
+                        }}
+                      >
+                        <span class="material-icons padding">
+                          add_circle_outline
                       </span>
-                      <p class="paragraph margin-right">
-                        Add as new ingredient?
+                        <p class="paragraph margin-right">
+                          Add as new ingredient?
                       </p>
-                    </div>
-                  ) : null}
+                      </div>
+                    ) : null}
                 </div>
 
                 {this.state.selectedIngredients.map((ingredient, index) => (

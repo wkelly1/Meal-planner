@@ -4,7 +4,7 @@ import { Settings } from "@material-ui/icons";
 import React, { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import useNotification from "../../_helpers/hooks/useNotification";
-import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/jwt";
+import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/services/auth.service";
 import Navigation from "../Navigation";
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
@@ -15,6 +15,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 
 import DeleteIcon from '@material-ui/icons/Delete';
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 function UserSettings(props) {
     const { addNotification } = useNotification();
@@ -46,31 +48,7 @@ function UserSettings(props) {
         if (!(firstName.length === 0 || lastName.length === 0)){
 
 
-        if (!isAuthenticated()) {
-            await updateToken();
-        }
-
-        const jwt = getJwt();
-
-        return fetch(`/api/people?first_name=${firstName}&last_name=${lastName}`, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${jwt}`,
-            },
-            body: JSON.stringify({
-                first_name: firstName,
-                last_name: lastName
-            })
-        })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+        userService.setPeople(firstName, lastName)
             .then((value) => {
                 people.push(value.person);
              
@@ -86,27 +64,7 @@ function UserSettings(props) {
     }
 
     async function deletePerson(people_id, index){
-        if (!isAuthenticated()) {
-            await updateToken();
-        }
-
-        const jwt = getJwt();
-
-        return fetch(`/api/people?people_id=${people_id}`, {
-            method: "DELETE",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${jwt}`,
-            }
-        })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+        userService.deletePeople(people_id)
             .then((value) => {
                 people.splice(index, 1);
                 addNotification("Person has been removed", "success");

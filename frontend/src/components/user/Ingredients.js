@@ -8,7 +8,7 @@ import {
   getJwt,
   updateToken,
   isAuthenticated,
-} from "../../_helpers/jwt";
+} from "../../_helpers/services/auth.service";
 
 import Navigation from "../Navigation";
 import ButtonLoader from "../_shared/ButtonLoader";
@@ -20,6 +20,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import useNotification from "../../_helpers/hooks/useNotification";
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 const Ingredients = (props) => {
   const [ingredients, setIngredients] = useState([]);
@@ -37,29 +39,13 @@ const Ingredients = (props) => {
   const { addNotification } = useNotification();
 
   useEffect(() => {
-    
+
     getIngredients(limit, offset);
   }, []);
 
   async function getIngredients(limit, offset) {
     if (!gotAllIngredients) {
-      if (!isAuthenticated()) {
-        await updateToken();
-      }
-
-      const jwt = getJwt();
-
-      fetch(`/api/ingredients?limit=${limit}&offset=${offset}`, {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-      })
-        .then((response) => {
-          catchError401(response.status);
-          return response.json();
-        })
+      userService.getIngredients(offset, limit)
         .then((value) => {
           setIngredients(ingredients.concat(value.ingredients));
           setIngredientsRefined(ingredients.concat(value.ingredients));
@@ -70,8 +56,9 @@ const Ingredients = (props) => {
           setOffset(offset + limit);
           setLoadingIngredients(false);
           setLoading(false);
-        }).catch((err) => {
-          console.error(err);
+        })
+        .catch((err) => {
+
         });
     } else {
       setLoadingIngredients(false);
@@ -80,42 +67,15 @@ const Ingredients = (props) => {
   }
 
   async function deleteIngredient(id, index) {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
-
-    const jwt = getJwt();
-    //console.log(mealsRefined.splice(mealTempIndex, 1))
-    fetch("/api/ingredients", {
-      method: "delete",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({
-        ingredient_id: id,
-      }),
-    })
-      .then((response) => {
-        if (response.status === 400) {
-          throw new Error("Error 400");
-        }
-        catchError401(response.status);
-        return response.json();
-      })
+    userService.deleteIngredient(id)
       .then((value) => {
-        
+
         ingredientsRefined.splice(index, 1);
         ingredients.splice(index, 1);
 
         addNotification("Ingredient has been deleted!", "success");
-
-        //setMealsRefined(mealsRefined.splice(mealTempIndex, 1))
-        //setMeals(mealsRefined.splice(mealTempIndex, 1))
       })
       .catch((error) => {
-        //addError("ERror", "test");
         addNotification("Something went wrong!", "error");
       });
   }
@@ -140,7 +100,7 @@ const Ingredients = (props) => {
     setDialogOpen(false);
   }
 
-  
+
   return (
     <div>
       <Helmet>
@@ -196,7 +156,7 @@ const Ingredients = (props) => {
           {ingredientsRefined.length === 0 && !loading ? (<div className="flex-container flex-column flex-align-center padding-topbottom">
             <h2 className="c-primary">Nothing yet!</h2>
           </div>) : (null)}
-          
+
           {loading ? (
             <div className="grid">
               <Skeleton variant="rect" width="100%">
@@ -224,7 +184,7 @@ const Ingredients = (props) => {
               <div
                 key={index}
                 className="flex-container flex-justify-spacebetween b-light-grey radius position-relative"
-                
+
               >
                 <div
                   className="position-absolute hoverDelete"

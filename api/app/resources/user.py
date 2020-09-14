@@ -8,7 +8,7 @@ from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash
 
 import app
-from app.database.models import User, db, User_people, People
+from app.database.models import User, db, People
 from app.resources._helpers import get_user, generateConfrimationToken, sendEmail, confirm_token
 
 
@@ -25,14 +25,12 @@ class UserApi(Resource):
 
         def mapFunc(value):
             return {
-                "first_name": value[1],
-                "last_name": value[2],
-                "people_id": value[3]
+                "first_name": value.first_name,
+                "last_name": value.last_name,
+                "people_id": value.public_people_id
             }
 
-        people = User_people.query.join(People).add_columns(People.first_name, People.last_name,
-                                                            People.public_people_id).filter(
-            User.user_id == user.user_id).all()
+        people = People.query.filter_by(user_user_id=user.user_id).all()
 
         print(people)
         return {"username": get_jwt_identity(), "firstName": user.first_name, "lastName": user.last_name,
@@ -136,12 +134,12 @@ class PeopleApi(Resource):
         data = parser.parse_args()
         user = get_user(get_jwt_identity())
 
-        person = People(first_name=data["first_name"], last_name=data["last_name"])
+        person = People(first_name=data["first_name"], last_name=data["last_name"], user_user_id=user.user_id)
         db.session.add(person)
-        db.session.flush()
-        db.session.refresh(person)
-        user_perople = User_people(user_user_id=user.user_id, people_people_id=person.people_id)
-        db.session.add(user_perople)
+        # db.session.flush()
+        # db.session.refresh(person)
+        # user_perople = User_people(user_user_id=user.user_id, people_people_id=person.people_id)
+        # db.session.add(user_perople)
         db.session.commit()
 
         return jsonify({
@@ -165,8 +163,7 @@ class PeopleApi(Resource):
 
         data = parser.parse_args()
         user = get_user(get_jwt_identity())
-        person = People.query.join(User_people).add_columns(User_people.user_user_id).filter(
-            People.public_people_id == data["people_id"]).first()
+        person = People.query.filter_by(public_people_id=data["people_id"]).first()
         if not person:
             return make_response(jsonify({
                 "msg": {
@@ -174,7 +171,7 @@ class PeopleApi(Resource):
                 }
             }), 400)
 
-        if person[1] != user.user_id:
+        if person.user_user_id != user.user_id:
             return make_response(jsonify({
                 "msg": {
                     "people_id": "You dont have access to that"

@@ -11,7 +11,7 @@ class Config(object):
     JWT_TOKEN_LOCATION = ('headers',)
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=15)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(seconds=15)
     SECRET_KEY = os.environ.get("SECRET_KEY")
     FRONTEND_DOMAIN = "127.0.0.1:3000"
     SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT")

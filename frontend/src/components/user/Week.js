@@ -32,7 +32,7 @@ import {
   getJwt,
   updateToken,
   isAuthenticated,
-} from "../../_helpers/jwt";
+} from "../../_helpers/services/auth.service";
 import useNotification from "../../_helpers/hooks/useNotification";
 import { DebounceInput } from "react-debounce-input";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -47,6 +47,8 @@ import {
 import DateFnsUtils from '@date-io/date-fns';
 import { AvatarGroup } from "@material-ui/lab";
 import { Rnd } from "react-rnd";
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 const Week = (props) => {
   const [open, setOpen] = React.useState(false);
@@ -190,18 +192,10 @@ const Week = (props) => {
   }
 
   const getCalendar = async (week, year) => {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
-
-    const jwt = getJwt();
+    const headers = await authHeader();
 
     fetch(`/api/calendar?week=${week}&year=${year}`, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
+      headers: headers,
     })
       .then((response) => {
         catchError401(response.status);
@@ -256,58 +250,38 @@ const Week = (props) => {
 
   async function getMeals(query, offset) {
 
-    console.log(mealSearchOffset);
+    userService.getMeals(offset, limit, query)
+    .then((value) => {
+      //console.log(value);
+      if (offset === 0) {
+        //console.log("DOING THIS")
+        setSearchedMeals(value.map((val) => {
+          return { ...val, collapsed: true };
+        }));
 
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
 
-    const jwt = getJwt();
+      } else {
+        setSearchedMeals(searchedMeals =>
+          searchedMeals.concat(
+            value.map((val) => {
+              return { ...val, collapsed: true };
+            })
+          )
+        );
+      }
 
-    fetch(`/api/meals?limit=${limit}&offset=${offset}&query=${query}`, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
+      if (value.length < limit) {
+        setGotAllMeals(true);
+      }
+
+      setMealSearchOffset(mealSearchOffset => mealSearchOffset + limit);
+
+      console.log(offset);
     })
-      .then((response) => {
-        catchError401(response.status);
-
-        return response.json();
-      })
-      .then((value) => {
-        //console.log(value);
-        if (offset === 0) {
-          //console.log("DOING THIS")
-          setSearchedMeals(value.map((val) => {
-            return { ...val, collapsed: true };
-          }));
-
-
-        } else {
-          setSearchedMeals(searchedMeals =>
-            searchedMeals.concat(
-              value.map((val) => {
-                return { ...val, collapsed: true };
-              })
-            )
-          );
-        }
-
-        if (value.length < limit) {
-          setGotAllMeals(true);
-        }
-
-        setMealSearchOffset(mealSearchOffset => mealSearchOffset + limit);
-
-        console.log(offset);
-      })
-      .catch((err) => {
-        console.error(err);
-        addNotification("Something went wrong", "error");
-      });
-    //}
+    .catch((err) => {
+      console.error(err);
+      addNotification("Something went wrong", "error");
+    });
   }
 
   function selectMeal(meal) {
@@ -335,44 +309,17 @@ const Week = (props) => {
       setMealSearchQuery(debouncedMealSearchQuery);
       setMealSearchOffset(0);
       setSearchedMeals([]);
-      //offset = 0;
+
       getMeals(debouncedMealSearchQuery, 0).then(() => { });
     }
   }, [debouncedMealSearchQuery])
 
 
   async function saveCalendar() {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
-
-    const jwt = getJwt();
-
     let for_current_user = people.some((value) => (value.current_user && value.selected));
     let newPeople = [...people.filter((value) => { if (!value.current_user && value.selected) { return true } }).map((value) => value.people_id)];
-    console.log(newPeople);
-    fetch(`/api/calendar`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({
-        meal_id: selectedMeal.meal_id,
-        meal_time: tempCalendarMealTime,
-        date: tempCalendarDate,
-        for_current_user: for_current_user,
-        people: newPeople
-      })
-    })
-      .then((response) => {
-        catchError401(response.status);
-        if (!response.ok) {
-          throw Error(response.statusText);
-        }
-        return response.json();
-      })
+
+    userService.setCalendar(selectedMeal.meal_id, tempCalendarMealTime, tempCalendarDate, for_current_user, newPeople)
       .then((value) => {
         setCalendar(calendar =>
           [...calendar, value.data]
@@ -386,27 +333,7 @@ const Week = (props) => {
   }
 
   async function deleteCalendar(calendar_id, index) {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
-
-    const jwt = getJwt();
-
-    return fetch(`/api/calendar?calendar_id=${calendar_id}`, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-    })
-      .then((response) => {
-        catchError401(response.status);
-        if (!response.ok) {
-          throw Error(response.statusText);
-        }
-        return response.json();
-      })
+    userService.deleteCalendar(calendar_id)
       .then((value) => {
         calendar.splice(index, 1);
         setOpenMealDetails(false);
@@ -420,31 +347,14 @@ const Week = (props) => {
   }
 
   async function getMealDetails(meal_id) {
-    if (!isAuthenticated()) {
-      await updateToken();
-    }
-
-    const jwt = getJwt();
-
-    return fetch(`/api/meals?meal_id=${meal_id}`, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
+    userService.getMeal(meal_id)
+    .then((value) => {
+      setFetchedMealDetails(value);
     })
-      .then((response) => {
-        catchError401(response.status);
-
-        return response.json();
-      })
-      .then((value) => {
-        setFetchedMealDetails(value);
-      })
-      .catch((err) => {
-        console.error(err);
-        addNotification("Something went wrong", "error");
-      });
+    .catch((err) => {
+      console.error(err);
+      addNotification("Something went wrong", "error");
+    });
   }
 
   function filterPeople(people) {
@@ -896,12 +806,12 @@ const Week = (props) => {
                         {day.date === convertDate(new Date()) ? (
                           <small
                             className="b-primary radius-small c-white"
-                            style={{ padding: "5px",fontSize: "12px" }}
+                            style={{ padding: "5px", fontSize: "12px" }}
                           >
                             {day.day}
                           </small>
                         ) : (
-                            <small className="margin-bottom c-dark-grey" style={{fontSize: "12px"}}>{day.day}</small>
+                            <small className="margin-bottom c-dark-grey" style={{ fontSize: "12px" }}>{day.day}</small>
                           )}
                       </div>
                       <div className="flex-container flex-column fill-width flex-sm-17">

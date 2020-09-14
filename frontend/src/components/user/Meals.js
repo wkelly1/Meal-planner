@@ -16,9 +16,11 @@ import {
     getJwt,
     updateToken,
     isAuthenticated,
-} from "../../_helpers/jwt";
+} from "../../_helpers/services/auth.service";
 import ButtonLoader from "../_shared/ButtonLoader";
 import { Button } from "@material-ui/core";
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 const Dashboard = (props) => {
     const [meals, setMeals] = useState([]);
@@ -47,28 +49,8 @@ const Dashboard = (props) => {
 
     async function getMeals(limit, offset) {
         if (!gotAllMeals) {
-            if (!isAuthenticated()) {
-                await updateToken();
-            }
 
-            const jwt = getJwt();
-            // if (!jwt){
-            //     alert("JWT " + jwt);
-            //     window.location.reload();
-            // }
-
-            fetch(`/api/meals?limit=${limit}&offset=${offset}`, {
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${jwt}`,
-                },
-            })
-                .then((response) => {
-                    catchError401(response.status);
-
-                    return response.json();
-                })
+            userService.getMeals(offset, limit)
                 .then((value) => {
                     setMeals(
                         meals.concat(
@@ -100,38 +82,10 @@ const Dashboard = (props) => {
     }
 
     async function deleteMeal() {
-        if (!isAuthenticated()) {
-            await updateToken();
-        }
-
-        const jwt = getJwt();
-        //console.log(mealsRefined.splice(mealTempIndex, 1))
-        fetch("/api/meals", {
-            method: "delete",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${jwt}`,
-            },
-            body: JSON.stringify({
-                meal_id: mealTemp.meal_id
-            }),
-        })
-            .then((response) => {
-                if (response.status === 400) {
-                    throw new Error("Error 400");
-                }
-                catchError401(response.status);
-                return response.json();
-            })
+        userService.deleteMeal(mealTemp.meal_id)
             .then((value) => {
                 mealsRefined.splice(mealTempIndex, 1)
                 setSuccessOpen(true);
-                console.log(mealTempIndex);
-
-                //setMealsRefined(mealsRefined.splice(mealTempIndex, 1))
-                //setMeals(mealsRefined.splice(mealTempIndex, 1))
-
             })
             .catch((error) => {
 
@@ -229,9 +183,9 @@ const Dashboard = (props) => {
                                         </ul>
                                     </div>
                                     <div class="flex-container flex-align-center">
-                                    <Tooltip title={"Cooked " + meal.usages + " times"}>
-                                        <Avatar style={{ background: "var(--c-primary)", color: "white" }}>{meal.usages}</Avatar>
-                                    </Tooltip>
+                                        <Tooltip title={"Cooked " + meal.usages + " times"}>
+                                            <Avatar style={{ background: "var(--c-primary)", color: "white" }}>{meal.usages}</Avatar>
+                                        </Tooltip>
                                     </div>
                                     <Button onClick={() => {
                                         let temp = [...mealsRefined];

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { logout } from "../_helpers/jwt";
+import { logout } from "../_helpers/services/auth.service";
 import { useTheme } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import BottomNavigation from '@material-ui/core/BottomNavigation';

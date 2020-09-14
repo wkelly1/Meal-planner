@@ -55,11 +55,6 @@ class Calendar(db.Model):
     def __hash__(self):
         return id(self)
 
-class User_people(db.Model):
-    __tablename__ = 'user_people'
-    user_user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), primary_key=True)
-    people_people_id = db.Column(db.Integer, db.ForeignKey('people.people_id'), primary_key=True)
-
 
 class Calendar_people(db.Model):
     __tablename__ = 'calendar_people'
@@ -72,5 +67,5 @@ class People(db.Model):
     first_name = db.Column(db.String(20))
     last_name = db.Column(db.String(20))
     public_people_id = db.Column(db.String(255), default=uuid.uuid4, unique=True, nullable=False)
-
+    user_user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
 
