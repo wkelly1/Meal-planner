@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet";
 import useNotification from "../../_helpers/hooks/useNotification";
 import { catchError401, getJwt, isAuthenticated, updateToken } from "../../_helpers/services/auth.service";
-import Navigation from "../Navigation";
+import Navigation from "../_shared/Navigation";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';

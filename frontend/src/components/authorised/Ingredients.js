@@ -10,7 +10,7 @@ import {
   isAuthenticated,
 } from "../../_helpers/services/auth.service";
 
-import Navigation from "../Navigation";
+import Navigation from "../_shared/Navigation";
 import ButtonLoader from "../_shared/ButtonLoader";
 import { Skeleton } from "@material-ui/lab";
 import { Button } from "@material-ui/core";

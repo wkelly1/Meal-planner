@@ -1,5 +1,5 @@
 import React from "react";
-import useNotification from "../_helpers/hooks/useNotification";
+import useNotification from "../../_helpers/hooks/useNotification";
 import { Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 

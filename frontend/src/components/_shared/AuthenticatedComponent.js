@@ -4,11 +4,11 @@ import {
   updateToken,
   getJwt,
   catchError401,
-} from "../_helpers/services/auth.service";
+} from "../../_helpers/services/auth.service";
 import { withRouter, Route } from "react-router-dom";
 import { CircularProgress, Backdrop, makeStyles } from "@material-ui/core";
-import authHeader from "../_helpers/services/auth-header";
-import userService from "../_helpers/services/user.service";
+import authHeader from "../../_helpers/services/auth-header";
+import userService from "../../_helpers/services/user.service";
 
 
 

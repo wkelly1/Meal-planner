@@ -5,8 +5,8 @@ import {
   updateToken,
   isAuthenticated,
 } from "../../_helpers/services/auth.service";
-import Navigation from "../Navigation";
-import history from "../../history";
+import Navigation from "../_shared/Navigation";
+import history from "../../_helpers/hooks/history";
 import { DebounceInput } from "react-debounce-input";
 import { Snackbar, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";

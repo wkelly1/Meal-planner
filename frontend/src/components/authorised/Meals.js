@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navigation from "../Navigation";
+import Navigation from "../_shared/Navigation";
 import { Helmet } from "react-helmet";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from '@material-ui/icons/ExpandLess';

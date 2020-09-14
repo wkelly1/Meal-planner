@@ -1,4 +1,4 @@
-import history from "../../history";
+import history from "../hooks/history";
 
 export const getJwt = () => {
     return localStorage.getItem("x-access-token")
