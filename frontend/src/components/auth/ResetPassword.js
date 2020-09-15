@@ -42,8 +42,11 @@ function ResetPassword(props) {
                     props.handleClose();
                 })
                 .catch((err) => {
-                    addNotification("Something went wrong with that, please try again", "error");
-                })
+                    if (err.response){
+                      addNotification(err.msg, err.type);
+                    } else {
+                      addNotification("Something went wrong", "error");
+                    }
         }
     }
 

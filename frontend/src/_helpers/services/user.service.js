@@ -1,5 +1,6 @@
 import authHeader from "./auth-header.js";
 import { catchError401 } from "./auth.service";
+import CheckError from "./checkerror.js";
 
 class UserService {
 
@@ -9,13 +10,7 @@ class UserService {
         return fetch("/api/user", {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async getMeal(meal_id) {
@@ -24,27 +19,16 @@ class UserService {
         return fetch(`/api/meals?meal_id=${meal_id}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
     /*eslint no-dupe-class-members: 0*/
-    async getMeals(offset, limit, query) {
+    async getMealsWithQuery(offset, limit, query) {
+        console.log("DOING THIS");
         const headers = await authHeader();
         return fetch(`/api/meals?limit=${limit}&offset=${offset}&query=${query}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async getMeals(offset, limit) {
@@ -52,13 +36,7 @@ class UserService {
         return fetch(`/api/meals?limit=${limit}&offset=${offset}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async setMeal(title, ingredients) {
@@ -71,13 +49,7 @@ class UserService {
                 ingredients: ingredients,
             }),
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+        .then(CheckError)
     }
 
     async deleteMeal(meal_id) {
@@ -89,13 +61,7 @@ class UserService {
                 meal_id: meal_id
             }),
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async getIngredients(offset, limit) {
@@ -103,27 +69,15 @@ class UserService {
         return fetch(`/api/ingredients?limit=${limit}&offset=${offset}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
-    async getIngredients(offset, limit, query) {
+    async getIngredientsWithQuery(offset, limit, query) {
         const headers = await authHeader();
         return fetch(`/api/ingredients?limit=${limit}&offset=${offset}&query=${query}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async deleteIngredient(ingredient_id) {
@@ -135,13 +89,7 @@ class UserService {
                 ingredient_id: ingredient_id,
             }),
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async setIngredient(name) {
@@ -153,13 +101,7 @@ class UserService {
                 name: name,
             }),
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
 
@@ -178,13 +120,7 @@ class UserService {
                 people: people
             })
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async getCalendar(week, year) {
@@ -193,13 +129,7 @@ class UserService {
         return fetch(`/api/calendar?week=${week}&year=${year}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async deleteCalendar(calendar_id) {
@@ -209,13 +139,7 @@ class UserService {
             method: "DELETE",
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async getShoppingList(year, week) {
@@ -224,13 +148,7 @@ class UserService {
         return fetch(`/api/list?year=${year}&week=${week}`, {
             headers: headers,
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async setPeople(first_name, last_name) {
@@ -243,13 +161,7 @@ class UserService {
                 last_name: last_name
             })
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 
     async deletePeople(people_id) {
@@ -258,13 +170,7 @@ class UserService {
             method: "DELETE",
             headers: headers
         })
-            .then((response) => {
-                catchError401(response.status);
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
+            .then(CheckError)
     }
 }
 

@@ -93,6 +93,10 @@ class ResetPasswordApi(Resource):
         # validating conditions
         if not mat:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "Password must be between 6 and 20 characters, have one number, an uppercase and a lowercase letter and at least one symbol"
+                },
                 "msg": {
                     "password": "Password must be between 6 and 20 characters, have one number, an uppercase and a lowercase letter and at least one symbol"
                 }
@@ -101,6 +105,10 @@ class ResetPasswordApi(Resource):
         user = User.query.filter_by(email=email).first()
         if not user:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That email address is not associated with an account"
+                },
                 "msg": {
                     "token": "Invalid token"
                 }
@@ -110,6 +118,10 @@ class ResetPasswordApi(Resource):
         db.session.commit()
 
         return {
+            "user_msg": {
+                "type": "success",
+                "msg": "Your password has been updated"
+            },
             "message": "Password updated"
         }
 
@@ -143,6 +155,10 @@ class PeopleApi(Resource):
         db.session.commit()
 
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "{0} {1] has been added".format(data["first_name"], data["last_name"])
+            },
             "msg": "user added",
             "person": {
                 "first_name": data["first_name"],
@@ -166,6 +182,10 @@ class PeopleApi(Resource):
         person = People.query.filter_by(public_people_id=data["people_id"]).first()
         if not person:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That person does not exist on your account"
+                },
                 "msg": {
                     "people_id": "Invalid people id"
                 }
@@ -173,7 +193,12 @@ class PeopleApi(Resource):
 
         if person.user_user_id != user.user_id:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That person does not exist on your account"
+                },
                 "msg": {
+
                     "people_id": "You dont have access to that"
                 }
             }), 400)
@@ -181,5 +206,9 @@ class PeopleApi(Resource):
         People.query.filter_by(public_people_id=data["people_id"]).delete()
         db.session.commit()
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "{0} {1} has been deleted".format(person.first_name, person.last_name)
+            },
             "msg": "Person deleted"
         })

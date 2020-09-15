@@ -5,6 +5,7 @@ import { DebounceInput } from "react-debounce-input";
 import { Snackbar, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import userService from "../../_helpers/services/user.service";
+import { withNotifications } from "../_shared/Notification";
 
 class AddMeal extends Component {
   constructor(props) {
@@ -41,7 +42,7 @@ class AddMeal extends Component {
 
   async getIngredients() {
     if (!this.state.gotAllIngredients) {
-      userService.getIngredients(this.state.offset, this.state.limit, this.state.ingredientSearch)
+      userService.getIngredientsWithQuery(this.state.offset, this.state.limit, this.state.ingredientSearch)
         .then((value) => {
           if (this.state.offset === 0) {
             this.setState({
@@ -108,10 +109,14 @@ class AddMeal extends Component {
       .then((value) => {
         history.push("/meals");
       })
-      .catch((error) => {
-        this.setState({
-          error: true,
-        });
+      .catch((err) => {
+        console.log(err)
+        if (err.response){
+          this.props.addNotification(err.data.msg, err.data.type);
+        } else {
+          this.props.addNotification("Something went wrong", "error");
+        }
+       
       });
   }
 
@@ -386,4 +391,4 @@ class AddMeal extends Component {
   }
 }
 
-export default AddMeal;
+export default withNotifications(AddMeal);

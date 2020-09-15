@@ -46,6 +46,10 @@ class Meals(Resource):
 
             if not (data["limit"] is not None and data["offset"] is not None):
                 return {
+                    "user_msg": {
+                        "type": "error",
+                        "msg": "Something went wrong"
+                    },
                     "message": {
                         "limit": "This field cannot be blank",
                         "offset": "This field cannot be blank"
@@ -86,12 +90,22 @@ class Meals(Resource):
             ingredient = Meal_ingredient.query.join(Ingredient).add_columns(Ingredient.name).filter(
                 Meal_ingredient.meal_meal_id == meals.meal_id).all()
             return {
+                "user_msg": {
+                    "type": "success",
+                    "msg": ""
+                },
                 "title": meals.title,
                 "meal_id": meals.public_meal_id,
                 "ingredients": list(map(ingredientMapFunc, ingredient))
             }
 
-        return list(map(mealMapFunc, meals))
+        return {
+            "user_msg": {
+                "type": "success",
+                "msg": ""
+            },
+            "meals": list(map(mealMapFunc, meals))
+        }, 200
 
     @jwt_required
     def post(self):
@@ -113,6 +127,10 @@ class Meals(Resource):
         ingredients_final = []
         if len(ingredients) == 0:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "A meal must have at least one ingredient"
+                },
                 "msg": {
                     "ingredient": "A meal must have at least one ingredient"
                 }
@@ -120,6 +138,10 @@ class Meals(Resource):
 
         if len(data["title"]) == 0:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "Meals need to have a title"
+                },
                 "msg": {
                     "title": "A title is required for the meal"
                 }
@@ -131,6 +153,10 @@ class Meals(Resource):
                     i["quantity"]) != int:
                 print("here")
                 return make_response(jsonify({
+                    "user_msg": {
+                        "type": "error",
+                        "msg": "Ingredients must have a quantity and must be on your account"
+                    },
                     "msg": {
                         "ingredient": "One or more of your ingredients has a problem"
                     }
@@ -143,6 +169,10 @@ class Meals(Resource):
         db.session.commit()
 
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "Your meal has been added"
+            },
             "msg": "meal added"
         })
 
@@ -160,6 +190,10 @@ class Meals(Resource):
         meal = Meal.query.filter_by(public_meal_id=data["meal_id"]).first()
         if not meal:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That meal does not exist"
+                },
                 "msg": {
                     "meal_id": "Invalid meal id"
                 }
@@ -167,6 +201,10 @@ class Meals(Resource):
 
         if meal.user_user_id != user.user_id:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That meal does not exist"
+                },
                 "msg": {
                     "meal_id": "Invalid meal id"
                 }
@@ -175,6 +213,10 @@ class Meals(Resource):
         Meal.query.filter_by(public_meal_id=data["meal_id"]).delete()
         db.session.commit()
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "Meal has been deleted"
+            },
             "msg": "Meal deleted"
         })
 
@@ -222,6 +264,10 @@ class Ingredients(Resource):
             "ingredients": list(map(ingredientMapFunc, ingredients))
         })
         return {
+            "user_msg": {
+                "type": "success",
+                "msg": ""
+            },
             "ingredients": list(map(ingredientMapFunc, ingredients))
         }
 
@@ -243,6 +289,10 @@ class Ingredients(Resource):
         db.session.commit()
 
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "{0} has been added".format(data["name"])
+            },
             "msg": "ingredient added",
             "ingredient": {
                 "name": ingredient.name,
@@ -264,6 +314,10 @@ class Ingredients(Resource):
         ingredient = Ingredient.query.filter_by(public_ingredient_id=data["ingredient_id"]).first()
         if not ingredient:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That ingredient does not exist"
+                },
                 "msg": {
                     "ingredient_id": "Invalid ingredient id"
                 }
@@ -271,6 +325,10 @@ class Ingredients(Resource):
 
         if ingredient.user_user_id != user.user_id:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That ingredient does not exist"
+                },
                 "msg": {
                     "ingredient_id": "Invalid ingredient id"
                 }
@@ -279,6 +337,10 @@ class Ingredients(Resource):
         Ingredient.query.filter_by(public_ingredient_id=data["ingredient_id"]).delete()
         db.session.commit()
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "{0} has been deleted".format(ingredient.name)
+            },
             "msg": "Ingredient deleted"
         })
 
@@ -346,23 +408,11 @@ class Calendar(Resource):
                         }
                     )
 
-
-
-        print(tempDict)
-
-        def calendarMapFunc(value):
-            # print(value[1])
-            return {
-                "date": str(value[0].date),
-                "meal_time": str(list(value[0].meal_time)[0]),
-                "meal_id": value[5],
-                "meal_title": value[1]
-            }
-
-        # print({
-        #     "calendar": list(map(calendarMapFunc, calendar))
-        # })
         return {
+            "user_msg": {
+                "type": "success",
+                "msg": ""
+            },
             "calendar": list(tempDict.values())
         }
 
@@ -402,6 +452,10 @@ class Calendar(Resource):
         meal_id = Meal.query.filter_by(public_meal_id=data["meal_id"]).first()
         if not meal_id:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That meal does not exist"
+                },
                 "msg": {
                     "meal_id": "Invalid meal id"
                 }
@@ -421,9 +475,6 @@ class Calendar(Resource):
 
         # calendarCheck = db.session.query(Calendar_people, Cal).join(Cal, Cal.calendar_id==Calendar_people.calendar_calendar_id).join(People).join(User_people).add_columns(People.public_people_id).filter(User_people.user_user_id==user.user_id).filter(Cal.date==data["date"]).all()
         calendarCheck = database.getAll()
-
-        # calendarCheck = Cal.query.outerjoin(Calendar_people).join(People).add_columns(People.public_people_id).filter(Cal.date==data["date"])
-        print(calendarCheck)
         if len(calendarCheck) > 0:
             if data["people"]:
                 def getPeopleMapFunc(value):
@@ -432,6 +483,10 @@ class Calendar(Resource):
                 people = map(getPeopleMapFunc, calendarCheck)
                 if len(set(data["people"]).intersection(set(people))) > 0:
                     return make_response(jsonify({
+                        "user_msg": {
+                            "type": "error",
+                            "msg": "You have already planned a meal for one of those people at that time"
+                        },
                         "msg": {
                             "meal_time": "You have already planned a meal for one of those people at that time"
                         }
@@ -440,41 +495,14 @@ class Calendar(Resource):
         if data["for_current_user"]:
             if any(value[2] for value in calendarCheck):
                 return make_response(jsonify({
+                    "user_msg": {
+                        "type": "error",
+                        "msg": "You have already planned a meal for yourself at that time"
+                    },
                     "msg": {
                         "meal_time": "You have already planned a meal for the current user at that time"
                     }
                 }), 400)
-
-        # for i in calendarCheck:
-        #     if data["people"]:
-        #         if i[2] in data["people"]:
-        #
-        #             return make_response(jsonify({
-        #                 "msg": {
-        #                     "meal_time": "You have already planned a meal for one of those people at that time"
-        #                 }
-        #             }), 400)
-        #     #print(i, i[0], i[0].for_current_user)
-        #     if i[2].for_current_user:
-        #         print(data["meal_time"], list(i[1].meal_time)[0])
-        #
-        #         return make_response(jsonify({
-        #             "msg": {
-        #                 "meal_time": "You have already planned a meal for the current user at that time"
-        #             }
-        #         }), 400)
-
-        # def mapFunc(value):
-        #     return list(value[0].meal_time)[0]
-        #
-        #
-        #
-        # if data["meal_time"] in map(mapFunc, calendarCheck):
-        #     return make_response(jsonify({
-        #         "msg": {
-        #             "meal_time": "You have already planned a meal for that meal time"
-        #         }
-        #     }), 400)
 
         calendar = Cal(date=data["date"], meal_time=data["meal_time"], meal_meal_id=meal_id.meal_id,
                        user_user_id=user.user_id, for_current_user=data["for_current_user"])
@@ -487,6 +515,10 @@ class Calendar(Resource):
                 person = People.query.filter_by(public_people_id=i).first()
                 if not person:
                     return make_response(jsonify({
+                        "user_msg": {
+                            "type": "error",
+                            "msg": "That person does not exist"
+                        },
                         "msg": {
                             "people_id": "Invalid people_id"
                         }
@@ -505,6 +537,10 @@ class Calendar(Resource):
         })
 
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "Meal added to your calendar"
+            },
             "msg": "Calendar added",
             "data": {
                 "date": str(calendar.date),
@@ -532,6 +568,10 @@ class Calendar(Resource):
         calendar = Cal.query.filter_by(public_calendar_id=data["calendar_id"]).first()
         if not calendar:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That calendar item does not exist"
+                },
                 "msg": {
                     "calendar_id": "Invalid calendar id"
                 }
@@ -539,6 +579,10 @@ class Calendar(Resource):
 
         if calendar.user_user_id != user.user_id:
             return make_response(jsonify({
+                "user_msg": {
+                    "type": "error",
+                    "msg": "That calendar item does not exist"
+                },
                 "msg": {
                     "calendar_id": "You dont have access to that"
                 }
@@ -547,6 +591,10 @@ class Calendar(Resource):
         Cal.query.filter_by(public_calendar_id=data["calendar_id"]).delete()
         db.session.commit()
         return jsonify({
+            "user_msg": {
+                "type": "success",
+                "msg": "That calendar item has been deleted"
+            },
             "msg": "Calendar deleted"
         })
 
@@ -590,6 +638,10 @@ class ShoppingListApi(Resource):
                 "unit": value["unit"]
             }
         return {
+            "user_msg": {
+                "type": "success",
+                "msg": ""
+            },
             "shopping_list": list(map(mapFunc, data))
         }
 

@@ -221,12 +221,12 @@ const Week = (props) => {
 
   async function getMeals(query, offset) {
 
-    userService.getMeals(offset, limit, query)
+    userService.getMealsWithQuery(offset, limit, query)
       .then((value) => {
         //console.log(value);
         if (offset === 0) {
           //console.log("DOING THIS")
-          setSearchedMeals(value.map((val) => {
+          setSearchedMeals(value.meals.map((val) => {
             return { ...val, collapsed: true };
           }));
 
@@ -234,14 +234,14 @@ const Week = (props) => {
         } else {
           setSearchedMeals(searchedMeals =>
             searchedMeals.concat(
-              value.map((val) => {
+              value.meals.map((val) => {
                 return { ...val, collapsed: true };
               })
             )
           );
         }
 
-        if (value.length < limit) {
+        if (value.meals.length < limit) {
           setGotAllMeals(true);
         }
 
@@ -250,8 +250,12 @@ const Week = (props) => {
         console.log(offset);
       })
       .catch((err) => {
-        console.error(err);
-        addNotification("Something went wrong", "error");
+        if (err.response){
+          addNotification(err.msg, err.type);
+        } else {
+          addNotification("Something went wrong", "error");
+        }
+        
       });
   }
 
@@ -356,11 +360,11 @@ const Week = (props) => {
 
 
   function PaperComponent(props) {
-
+    const {setx, sety, ...newProps} = props;
     return (
       <Draggable cancel={'[class*="MuiDialogContent-root"]'} handle={props.handle}  onStop={(e, u) => { props.setx(u.x); props.sety(u.y); }} position={{ x: props.x, y: props.y }}>
 
-        <Paper {...props} style={{ margin: 0, maxWidth: 362 }} />
+        <Paper {...newProps} style={{ margin: 0, maxWidth: 362 }} />
 
       </Draggable>
 
@@ -655,7 +659,7 @@ const Week = (props) => {
           <section className="flex-container">
 
             {people.map((value, index) => (
-              <Chip style={{ margin: "5px" }} deleteIcon={value.selected ? <DoneIcon /> : (null)} variant={value.selected ? "default" : "outlined"} color="primary" onDelete={() => { let temp = [...people]; temp[index].selected = !temp[index].selected; setPeople(temp) }} avatar={<Avatar>{value.first_name.substring(0, 1) + value.last_name.substring(0, 1)}</Avatar>} />
+              <Chip key={index} style={{ margin: "5px" }} deleteIcon={value.selected ? <DoneIcon /> : (null)} variant={value.selected ? "default" : "outlined"} color="primary" onDelete={() => { let temp = [...people]; temp[index].selected = !temp[index].selected; setPeople(temp) }} avatar={<Avatar>{value.first_name.substring(0, 1) + value.last_name.substring(0, 1)}</Avatar>} />
             ))}
           </section>
         </DialogContent>
@@ -719,7 +723,7 @@ const Week = (props) => {
                       )}
 
                     <div className="flex-container flex-column fill-width">
-                      {calendar.map((cal, index) => (<div>
+                      {calendar.map((cal, index) => (<div key={index}>
                         {
                           cal.date === day.date && cal.meal_time === "breakfast" ? (
                             <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null
@@ -729,7 +733,7 @@ const Week = (props) => {
                       {tempCalendarDate === day.date && tempCalendarMealTime === "breakfast" ? (
                         <CalendarItem meal_time={tempCalendarMealTime} meal_title={tempCalendarMealTitle} people={filterPeople(people)} first_name={props.current_user.firstName} last_name={props.current_user.lastName} for_current_user={false} />
                       ) : null}
-                      {calendar.map((cal, index) => (<div>
+                      {calendar.map((cal, index) => (<div key={index}>
                         {
                           cal.date === day.date && cal.meal_time === "lunch" ? (
                             <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null
@@ -741,7 +745,7 @@ const Week = (props) => {
                         <CalendarItem meal_time={tempCalendarMealTime} meal_title={tempCalendarMealTitle} people={filterPeople(people)} first_name={props.current_user.firstName} last_name={props.current_user.lastName} for_current_user={false} />
                       ) : null}
 
-                      {calendar.map((cal, index) => (<div>
+                      {calendar.map((cal, index) => (<div key={index}>
                         {
                           cal.date === day.date && cal.meal_time === "dinner" ? (
                             <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null
@@ -784,7 +788,7 @@ const Week = (props) => {
                           )}
                       </div>
                       <div className="flex-container flex-column fill-width flex-sm-17">
-                        {calendar.map((cal, index) => (<div>
+                        {calendar.map((cal, index) => (<div key={index}>
                           {
                             cal.date === day.date && cal.meal_time === "breakfast" ? (
                               <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null
@@ -794,7 +798,7 @@ const Week = (props) => {
                         {tempCalendarDate === day.date && tempCalendarMealTime === "breakfast" ? (
                           <CalendarItem meal_time={tempCalendarMealTime} meal_title={tempCalendarMealTitle} people={filterPeople(people)} first_name={props.current_user.firstName} last_name={props.current_user.lastName} for_current_user={false} />
                         ) : null}
-                        {calendar.map((cal, index) => (<div>
+                        {calendar.map((cal, index) => (<div key={index}>
                           {
                             cal.date === day.date && cal.meal_time === "lunch" ? (
                               <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null
@@ -806,7 +810,7 @@ const Week = (props) => {
                           <CalendarItem meal_time={tempCalendarMealTime} meal_title={tempCalendarMealTitle} people={filterPeople(people)} first_name={props.current_user.firstName} last_name={props.current_user.lastName} for_current_user={false} />
                         ) : null}
 
-                        {calendar.map((cal, index) => (<div>
+                        {calendar.map((cal, index) => (<div key={index}>
                           {
                             cal.date === day.date && cal.meal_time === "dinner" ? (
                               <CalendarItem onClick={(e) => { openDetailsDialog(e, cal.meal_id, index) }} key={index} meal_time={cal.meal_time} meal_title={cal.meal_title} people={cal.people} for_current_user={cal.for_current_user} first_name={props.current_user.firstName} last_name={props.current_user.lastName} />) : null

@@ -46,14 +46,14 @@ const Dashboard = (props) => {
                 .then((value) => {
                     setMeals(
                         meals.concat(
-                            value.map((val) => {
+                            value.meals.map((val) => {
                                 return { ...val, collapsed: true };
                             })
                         )
                     );
                     setMealsRefined(
                         meals.concat(
-                            value.map((val) => {
+                            value.meals.map((val) => {
                                 return { ...val, collapsed: true };
                             })
                         )
